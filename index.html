@@ -136,7 +136,7 @@
         let gameSpeed = 150;
         let gameLoopId;
         let changingDirection = false;
-        const foodTypes = ['apple', 'banana', 'grape', 'strawberry', 'orange'];
+        const foodTypes = ['apple', 'banana', 'grape', 'orange'];
 
         // Initialize game
         function init() {
@@ -174,7 +174,7 @@
                 }
                 
                 if (checkFoodCollision()) {
-                    score += 1; // All foods give 1 point
+                    score += 1; // All foods give exactly 1 point
                     scoreElement.textContent = `Score: ${score}`;
                     
                     // Update high score
@@ -324,31 +324,6 @@
                             );
                             ctx.fill();
                         }
-                    }
-                    break;
-                    
-                case 'strawberry':
-                    // Red strawberry
-                    ctx.fillStyle = '#e74c3c';
-                    ctx.beginPath();
-                    ctx.moveTo(centerX - radius, centerY + radius);
-                    ctx.lineTo(centerX, centerY - radius);
-                    ctx.lineTo(centerX + radius, centerY + radius);
-                    ctx.closePath();
-                    ctx.fill();
-                    
-                    // Seeds
-                    ctx.fillStyle = '#f39c12';
-                    for (let i = 0; i < 5; i++) {
-                        ctx.beginPath();
-                        ctx.arc(
-                            centerX - radius/2 + i * radius/2, 
-                            centerY - radius/3 + (i % 2) * radius/3, 
-                            2, 
-                            0, 
-                            Math.PI * 2
-                        );
-                        ctx.fill();
                     }
                     break;
                     
