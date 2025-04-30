@@ -127,7 +127,7 @@
         // Game variables
         const gridSize = 20;
         let snake = [{x: 10, y: 10}];
-        let food = {x: 5, y: 5, type: 'normal'};
+        let food = {x: 5, y: 5, type: 'apple'};
         let dx = 0;
         let dy = 0;
         let score = 0;
@@ -136,7 +136,7 @@
         let gameSpeed = 150;
         let gameLoopId;
         let changingDirection = false;
-        const foodTypes = ['normal', 'bonus', 'speed'];
+        const foodTypes = ['apple', 'banana', 'grape', 'strawberry', 'orange'];
 
         // Initialize game
         function init() {
@@ -174,17 +174,7 @@
                 }
                 
                 if (checkFoodCollision()) {
-                    if (food.type === 'bonus') {
-                        score += 5;
-                    } else if (food.type === 'speed') {
-                        gameSpeed = Math.max(50, gameSpeed - 15);
-                        clearInterval(gameLoopId);
-                        gameLoopId = setInterval(main, gameSpeed);
-                        score += 2;
-                    } else {
-                        score += 1;
-                    }
-                    
+                    score += 1; // All foods give 1 point
                     scoreElement.textContent = `Score: ${score}`;
                     
                     // Update high score
@@ -288,28 +278,102 @@
         }
 
         function drawFood() {
-            if (food.type === 'bonus') {
-                ctx.fillStyle = '#ef4444'; // Red for bonus
-            } else if (food.type === 'speed') {
-                ctx.fillStyle = '#3b82f6'; // Blue for speed
-            } else {
-                ctx.fillStyle = '#f59e0b'; // Original color
-            }
-            
-            ctx.beginPath();
             const centerX = food.x * gridSize + gridSize / 2;
             const centerY = food.y * gridSize + gridSize / 2;
             const radius = gridSize / 2;
-            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-            ctx.fill();
             
-            // Food details
-            ctx.fillStyle = food.type === 'bonus' ? '#b91c1c' : (food.type === 'speed' ? '#1d4ed8' : '#d97706');
-            ctx.beginPath();
-            ctx.arc(centerX - 3, centerY - 3, 2, 0, Math.PI * 2);
-            ctx.arc(centerX + 4, centerY - 1, 2, 0, Math.PI * 2);
-            ctx.arc(centerX - 2, centerY + 3, 2, 0, Math.PI * 2);
-            ctx.fill();
+            switch(food.type) {
+                case 'apple':
+                    // Red apple
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Apple stem
+                    ctx.fillStyle = '#2ecc71';
+                    ctx.fillRect(centerX - 2, centerY - radius - 3, 4, 6);
+                    break;
+                    
+                case 'banana':
+                    // Yellow banana
+                    ctx.fillStyle = '#f1c40f';
+                    ctx.beginPath();
+                    ctx.ellipse(centerX, centerY, radius, radius/1.5, Math.PI/4, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Banana ends
+                    ctx.fillStyle = '#e67e22';
+                    ctx.beginPath();
+                    ctx.arc(centerX - radius/2, centerY - radius/2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                    
+                case 'grape':
+                    // Purple grapes
+                    ctx.fillStyle = '#9b59b6';
+                    for (let i = 0; i < 3; i++) {
+                        for (let j = 0; j < 2; j++) {
+                            ctx.beginPath();
+                            ctx.arc(
+                                centerX - radius/2 + i * radius/2, 
+                                centerY - radius/2 + j * radius/2, 
+                                radius/3, 
+                                0, 
+                                Math.PI * 2
+                            );
+                            ctx.fill();
+                        }
+                    }
+                    break;
+                    
+                case 'strawberry':
+                    // Red strawberry
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.beginPath();
+                    ctx.moveTo(centerX - radius, centerY + radius);
+                    ctx.lineTo(centerX, centerY - radius);
+                    ctx.lineTo(centerX + radius, centerY + radius);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Seeds
+                    ctx.fillStyle = '#f39c12';
+                    for (let i = 0; i < 5; i++) {
+                        ctx.beginPath();
+                        ctx.arc(
+                            centerX - radius/2 + i * radius/2, 
+                            centerY - radius/3 + (i % 2) * radius/3, 
+                            2, 
+                            0, 
+                            Math.PI * 2
+                        );
+                        ctx.fill();
+                    }
+                    break;
+                    
+                case 'orange':
+                default:
+                    // Orange fruit
+                    ctx.fillStyle = '#e67e22';
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Segment lines
+                    ctx.strokeStyle = '#d35400';
+                    ctx.lineWidth = 1;
+                    for (let i = 0; i < 6; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(centerX, centerY);
+                        ctx.lineTo(
+                            centerX + Math.cos(i * Math.PI/3) * radius,
+                            centerY + Math.sin(i * Math.PI/3) * radius
+                        );
+                        ctx.stroke();
+                    }
+                    break;
+            }
         }
 
         function drawScore() {
