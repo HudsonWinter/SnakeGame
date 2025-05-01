@@ -13,6 +13,17 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            min-height: 100vh;
+            margin: 0;
+            /* Allow scrolling but limit how far */
+            overflow-y: auto;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: calc(100vh - 40px); /* Account for padding */
         }
         
         canvas {
@@ -61,7 +72,7 @@
         
         .game-over-overlay {
             display: none;
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -90,26 +101,29 @@
             text-align: center;
             color: #9ca3af;
             font-size: 14px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="score-container">
-        <div class="score" id="snakeScore">Score: 0</div>
-        <div class="high-score" id="snakeHighScore">High Score: 0</div>
-    </div>
-    <canvas id="snakeCanvas" width="400" height="400" tabindex="0"></canvas>
-    <div class="controls">
-        <button id="restartSnake">Play Again</button>
-    </div>
-    
-    <div class="game-over-overlay" id="gameOverOverlay">
-        <div class="game-over-text">GAME OVER</div>
-        <div class="final-score" id="finalScore">Score: 0</div>
-    </div>
-    
-    <div class="instructions">
-        Use arrow keys to move
+    <div class="game-container">
+        <div class="score-container">
+            <div class="score" id="snakeScore">Score: 0</div>
+            <div class="high-score" id="snakeHighScore">High Score: 0</div>
+        </div>
+        <canvas id="snakeCanvas" width="400" height="400" tabindex="0"></canvas>
+        <div class="controls">
+            <button id="restartSnake">Play Again</button>
+        </div>
+        
+        <div class="game-over-overlay" id="gameOverOverlay">
+            <div class="game-over-text">GAME OVER</div>
+            <div class="final-score" id="finalScore">Score: 0</div>
+        </div>
+        
+        <div class="instructions">
+            Use arrow keys to move
+        </div>
     </div>
 
     <script>
@@ -174,17 +188,15 @@
                 }
                 
                 if (checkFoodCollision()) {
-                    score += 1; // All foods give exactly 1 point
+                    score += 1;
                     scoreElement.textContent = `Score: ${score}`;
                     
-                    // Update high score
                     if (score > highScore) {
                         highScore = score;
                         highScoreElement.textContent = `High Score: ${highScore}`;
                         localStorage.setItem('snakeHighScore', highScore);
                     }
                     
-                    // Increase speed every 50 points
                     if (score % 50 === 0 && gameSpeed > 50) {
                         gameSpeed -= 10;
                         clearInterval(gameLoopId);
@@ -209,11 +221,9 @@
 
         // Draw functions
         function clearCanvas() {
-            // Grass background
             ctx.fillStyle = '#2e8b57';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Grid pattern
             ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
             ctx.lineWidth = 1;
             for (let i = 0; i < canvas.width; i += gridSize) {
@@ -231,43 +241,38 @@
 
         function drawSnake() {
             snake.forEach((segment, index) => {
-                // Snake head
                 if (index === 0) {
                     ctx.fillStyle = '#10b981';
                     ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
                     
-                    // Eyes
                     ctx.fillStyle = 'white';
-                    if (dx === 1) { // Right
+                    if (dx === 1) {
                         ctx.fillRect(segment.x * gridSize + gridSize - 6, segment.y * gridSize + 5, 4, 4);
                         ctx.fillRect(segment.x * gridSize + gridSize - 6, segment.y * gridSize + gridSize - 9, 4, 4);
-                    } else if (dx === -1) { // Left
+                    } else if (dx === -1) {
                         ctx.fillRect(segment.x * gridSize + 2, segment.y * gridSize + 5, 4, 4);
                         ctx.fillRect(segment.x * gridSize + 2, segment.y * gridSize + gridSize - 9, 4, 4);
-                    } else if (dy === -1) { // Up
+                    } else if (dy === -1) {
                         ctx.fillRect(segment.x * gridSize + 5, segment.y * gridSize + 2, 4, 4);
                         ctx.fillRect(segment.x * gridSize + gridSize - 9, segment.y * gridSize + 2, 4, 4);
-                    } else { // Down
+                    } else {
                         ctx.fillRect(segment.x * gridSize + 5, segment.y * gridSize + gridSize - 6, 4, 4);
                         ctx.fillRect(segment.x * gridSize + gridSize - 9, segment.y * gridSize + gridSize - 6, 4, 4);
                     }
                     
-                    // Tongue when moving
                     if (dx !== 0 || dy !== 0) {
                         ctx.fillStyle = '#ef4444';
-                        if (dx === 1) { // Right
+                        if (dx === 1) {
                             ctx.fillRect(segment.x * gridSize + gridSize, segment.y * gridSize + gridSize/2 - 1, 4, 2);
-                        } else if (dx === -1) { // Left
+                        } else if (dx === -1) {
                             ctx.fillRect(segment.x * gridSize - 4, segment.y * gridSize + gridSize/2 - 1, 4, 2);
-                        } else if (dy === -1) { // Up
+                        } else if (dy === -1) {
                             ctx.fillRect(segment.x * gridSize + gridSize/2 - 1, segment.y * gridSize - 4, 2, 4);
-                        } else if (dy === 1) { // Down
+                        } else if (dy === 1) {
                             ctx.fillRect(segment.x * gridSize + gridSize/2 - 1, segment.y * gridSize + gridSize, 2, 4);
                         }
                     }
-                } 
-                // Snake body
-                else {
+                } else {
                     ctx.fillStyle = '#34d399';
                     ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
                 }
@@ -284,25 +289,19 @@
             
             switch(food.type) {
                 case 'apple':
-                    // Red apple
                     ctx.fillStyle = '#e74c3c';
                     ctx.beginPath();
                     ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
                     ctx.fill();
-                    
-                    // Apple stem
                     ctx.fillStyle = '#2ecc71';
                     ctx.fillRect(centerX - 2, centerY - radius - 3, 4, 6);
                     break;
                     
                 case 'banana':
-                    // Yellow banana
                     ctx.fillStyle = '#f1c40f';
                     ctx.beginPath();
                     ctx.ellipse(centerX, centerY, radius, radius/1.5, Math.PI/4, 0, Math.PI * 2);
                     ctx.fill();
-                    
-                    // Banana ends
                     ctx.fillStyle = '#e67e22';
                     ctx.beginPath();
                     ctx.arc(centerX - radius/2, centerY - radius/2, 3, 0, Math.PI * 2);
@@ -310,7 +309,6 @@
                     break;
                     
                 case 'grape':
-                    // Purple grapes
                     ctx.fillStyle = '#9b59b6';
                     for (let i = 0; i < 3; i++) {
                         for (let j = 0; j < 2; j++) {
@@ -329,13 +327,10 @@
                     
                 case 'orange':
                 default:
-                    // Orange fruit
                     ctx.fillStyle = '#e67e22';
                     ctx.beginPath();
                     ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
                     ctx.fill();
-                    
-                    // Segment lines
                     ctx.strokeStyle = '#d35400';
                     ctx.lineWidth = 1;
                     for (let i = 0; i < 6; i++) {
@@ -358,7 +353,6 @@
             ctx.fillText(`Speed: ${Math.floor((150 - gameSpeed) / 10)}`, 10, 20);
         }
 
-        // Game logic
         function moveSnake() {
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
             snake.unshift(head);
@@ -371,13 +365,11 @@
         function checkCollision() {
             const head = snake[0];
             
-            // Wall collision
             if (head.x < 0 || head.x >= canvas.width/gridSize || 
                 head.y < 0 || head.y >= canvas.height/gridSize) {
                 return true;
             }
             
-            // Self collision
             for (let i = 1; i < snake.length; i++) {
                 if (head.x === snake[i].x && head.y === snake[i].y) {
                     return true;
@@ -400,7 +392,6 @@
                 type: foodTypes[Math.floor(Math.random() * foodTypes.length)]
             };
             
-            // Make sure food doesn't appear on snake
             for (let segment of snake) {
                 if (segment.x === food.x && segment.y === food.y) {
                     return placeFood();
@@ -408,7 +399,6 @@
             }
         }
 
-        // Keyboard controls
         function changeDirection(e) {
             if (gameOver || changingDirection) return;
             changingDirection = true;
@@ -433,17 +423,14 @@
                 dy = 1;
             }
             
-            // Prevent arrow keys from scrolling
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
                 e.preventDefault();
             }
         }
 
-        // Event listeners
         canvas.addEventListener('keydown', changeDirection);
         restartButton.addEventListener('click', init);
 
-        // Start game
         init();
     </script>
 </body>
